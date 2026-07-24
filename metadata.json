@@ -1,0 +1,6 @@
+{
+  "name": "TripMaster - AI 여행 계획 및 맞춤 일정",
+  "description": "AI 기반 여행 관심사 맞춤 일정 생성, 교통수단 비교, 일자별 상세 여행 일정 관리 플랫폼",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
