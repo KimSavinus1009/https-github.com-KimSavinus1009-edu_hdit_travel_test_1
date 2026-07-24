@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Check } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Check, ChevronDown } from "lucide-react";
 
 interface DatePickerModalProps {
   isOpen: boolean;
@@ -21,6 +21,12 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
 
   const [startDay, setStartDay] = useState<number | null>(12);
   const [endDay, setEndDay] = useState<number | null>(15);
+
+  // Mode for Year/Month Selector
+  const [showYearPicker, setShowYearPicker] = useState(false);
+
+  const yearsList = [2024, 2025, 2026, 2027, 2028, 2029, 2030];
+  const monthsList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
   const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
   const firstDayIndex = new Date(currentYear, currentMonth - 1, 1).getDay();
@@ -106,7 +112,7 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
             <p className="text-[11px] font-semibold text-slate-400">선택된 일정</p>
             <p className="text-xs font-extrabold text-blue-400">
               {startDay
-                ? `${currentMonth}월 ${startDay}일`
+                ? `${currentYear}년 ${currentMonth}월 ${startDay}일`
                 : "출발일 선택"}{" "}
               ~{" "}
               {endDay
@@ -121,7 +127,7 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
           )}
         </div>
 
-        {/* Month Navigation */}
+        {/* Month Navigation & Clickable Year/Month Header */}
         <div className="flex items-center justify-between px-2">
           <button
             onClick={handlePrevMonth}
@@ -129,9 +135,17 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <span className="text-sm font-extrabold text-white">
-            {currentYear}년 {currentMonth}월
-          </span>
+
+          {/* Clickable Area for Year/Month Selector */}
+          <button
+            onClick={() => setShowYearPicker(!showYearPicker)}
+            className="px-3 py-1.5 rounded-xl bg-slate-800/90 border border-slate-700/80 hover:border-blue-500 text-sm font-extrabold text-white hover:text-blue-400 transition flex items-center gap-1.5 shadow-sm"
+            title="년도 및 월 선택"
+          >
+            <span>{currentYear}년 {currentMonth}월</span>
+            <ChevronDown className={`w-4 h-4 text-blue-400 transition-transform ${showYearPicker ? "rotate-180" : ""}`} />
+          </button>
+
           <button
             onClick={handleNextMonth}
             className="p-1.5 rounded-xl text-slate-300 hover:bg-slate-800 hover:text-white transition"
@@ -140,52 +154,109 @@ export const DatePickerModal: React.FC<DatePickerModalProps> = ({
           </button>
         </div>
 
-        {/* Days Grid Header */}
-        <div className="grid grid-cols-7 text-center">
-          {dayLabels.map((label, idx) => (
-            <span
-              key={label}
-              className={`text-xs font-bold py-1 ${
-                idx === 0 ? "text-rose-400" : idx === 6 ? "text-blue-400" : "text-slate-400"
-              }`}
+        {/* YEAR / MONTH SELECTOR GRID OR STANDARD CALENDAR GRID */}
+        {showYearPicker ? (
+          <div className="p-3 bg-slate-950/80 rounded-2xl border border-slate-800 space-y-4 animate-in fade-in">
+            {/* Year Selection Section */}
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-bold text-slate-400 px-1">년도 선택</span>
+              <div className="grid grid-cols-4 gap-2">
+                {yearsList.map((y) => (
+                  <button
+                    key={y}
+                    onClick={() => setCurrentYear(y)}
+                    className={`py-2 text-xs font-extrabold rounded-xl transition ${
+                      currentYear === y
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
+                        : "bg-slate-800/70 text-slate-300 hover:bg-slate-800 hover:text-white"
+                    }`}
+                  >
+                    {y}년
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Month Selection Section */}
+            <div className="space-y-1.5 pt-1">
+              <span className="text-[11px] font-bold text-slate-400 px-1">월 선택</span>
+              <div className="grid grid-cols-4 gap-2">
+                {monthsList.map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => {
+                      setCurrentMonth(m);
+                      setShowYearPicker(false);
+                    }}
+                    className={`py-2 text-xs font-extrabold rounded-xl transition ${
+                      currentMonth === m
+                        ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
+                        : "bg-slate-800/70 text-slate-300 hover:bg-slate-800 hover:text-white"
+                    }`}
+                  >
+                    {m}월
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowYearPicker(false)}
+              className="w-full py-2 rounded-xl bg-slate-800 text-slate-200 text-xs font-bold hover:bg-slate-700 transition mt-2"
             >
-              {label}
-            </span>
-          ))}
-        </div>
+              달력으로 돌아가기
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Days Grid Header */}
+            <div className="grid grid-cols-7 text-center">
+              {dayLabels.map((label, idx) => (
+                <span
+                  key={label}
+                  className={`text-xs font-bold py-1 ${
+                    idx === 0 ? "text-rose-400" : idx === 6 ? "text-blue-400" : "text-slate-400"
+                  }`}
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
 
-        {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-1 text-center">
-          {/* Blank cells */}
-          {Array.from({ length: firstDayIndex }).map((_, i) => (
-            <div key={`blank-${i}`} className="p-2" />
-          ))}
+            {/* Calendar Grid */}
+            <div className="grid grid-cols-7 gap-1 text-center">
+              {/* Blank cells */}
+              {Array.from({ length: firstDayIndex }).map((_, i) => (
+                <div key={`blank-${i}`} className="p-2" />
+              ))}
 
-          {/* Day Cells */}
-          {Array.from({ length: daysInMonth }).map((_, i) => {
-            const day = i + 1;
-            const isStart = startDay === day;
-            const isEnd = endDay === day;
-            const isInRange =
-              startDay && endDay && day > startDay && day < endDay;
+              {/* Day Cells */}
+              {Array.from({ length: daysInMonth }).map((_, i) => {
+                const day = i + 1;
+                const isStart = startDay === day;
+                const isEnd = endDay === day;
+                const isInRange =
+                  startDay && endDay && day > startDay && day < endDay;
 
-            return (
-              <button
-                key={day}
-                onClick={() => handleDayClick(day)}
-                className={`py-2 text-xs font-bold rounded-xl transition-all relative ${
-                  isStart || isEnd
-                    ? "bg-blue-600 text-white shadow-lg shadow-blue-600/40 z-10 scale-105"
-                    : isInRange
-                    ? "bg-blue-500/20 text-blue-200 border-y border-blue-500/30"
-                    : "text-slate-200 hover:bg-slate-800"
-                }`}
-              >
-                {day}
-              </button>
-            );
-          })}
-        </div>
+                return (
+                  <button
+                    key={day}
+                    onClick={() => handleDayClick(day)}
+                    className={`py-2 text-xs font-bold rounded-xl transition-all relative ${
+                      isStart || isEnd
+                        ? "bg-blue-600 text-white shadow-lg shadow-blue-600/40 z-10 scale-105"
+                        : isInRange
+                        ? "bg-blue-500/20 text-blue-200 border-y border-blue-500/30"
+                        : "text-slate-200 hover:bg-slate-800"
+                    }`}
+                  >
+                    {day}
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        )}
 
         {/* Confirm Button */}
         <button
